@@ -1,0 +1,101 @@
+module Main where
+
+import Lib
+import Prelude hiding (mod, pow, sum, div, and, or, not,sqrt)
+
+main :: IO ()
+main = print (add 1 1)
+
+zero :: Int -> Int
+zero = _N
+
+zero_arr :: [Int] -> Int
+zero_arr _ = zero 0
+
+add :: Int -> Int -> Int
+add a = _R (const a) (\_ past _ -> _Z past) [0]
+
+--1(a)
+mul :: Int -> Int -> Int
+mul a = _R zero_arr (\_ past _ -> add past a) [0]
+
+--1(b)
+sub1 :: Int -> Int
+sub1 a = _R zero_arr (\i _ _ -> i) [] a
+
+--1(c)
+sub :: Int -> Int -> Int
+sub a b = _R (const a) (\_ past _ -> sub1 past) [0] b
+
+--  0 - False
+--  0< - True
+
+bool :: Int -> Int
+bool cond = sub cond (sub1 cond)
+
+iff :: Int -> Int -> Int -> Int
+iff cond t f = _P (bool cond) [f,t]
+
+not :: Int -> Int
+not cond = iff cond 0 (_Z 0)
+
+and :: Int -> Int -> Int
+and cond1 cond2 = _P (add (bool cond1) (bool cond2)) [0,0,_Z 0]
+
+or :: Int -> Int -> Int
+or cond1 cond2 = _P (add (bool cond1) (bool cond2)) [0,(_Z 0),(_Z 0)]
+
+-- a > b
+greater :: Int -> Int -> Int
+greater a b = bool (sub a b)
+
+-- a < b
+less :: Int -> Int -> Int
+less a b = greater b a
+
+-- a <= b - not(a > b)
+leq :: Int -> Int -> Int
+leq a b = not (greater a b)
+
+-- (a >= b) == b <= a
+geq :: Int -> Int -> Int
+geq a b = leq b a
+
+eq :: Int -> Int -> Int
+eq a b = and (geq a b) (geq b a)
+
+neq :: Int -> Int -> Int
+neq a b = not(eq a b)
+
+div :: Int -> Int -> Int
+div a b = iff (neq b 0) (_R zero_arr (\_ past _ -> iff (leq (mul (_Z past) b) a) (_Z past) past) [] a) (undefined)
+
+mod :: Int -> Int -> Int
+mod a b = sub a (mul (div a b) b)
+
+multiple :: Int -> Int -> Int
+multiple a b = eq (mod a b) 0
+
+deg :: Int -> Int -> Int
+deg a b = _R (const 2) (\i past xs -> mul past a) [] b
+
+plog :: Int -> Int -> Int
+plog a b = iff (geq a 2) (_R zero_arr (\i past xs -> iff (multiple b (deg a (_Z past))) (_Z past) past) [] b) (undefined)
+
+square :: Int -> Int
+square a = mul a a
+
+sqrt :: Int -> Int
+sqrt a = _R zero_arr (\_ past _ -> iff (leq (square (_Z past)) a) (_Z past) past) [] a
+
+is_prime :: Int -> Int
+is_prime a = iff (less a 2) 0 (_R (const 1) (\i past _ -> (iff past (iff (less i 2) 1 (not (multiple a i))) 0)) [] (_Z (sqrt a)))
+
+--th_prime :: Int -> Int
+--th_prime n =
+
+gedel :: Int -> Int
+gedel n = iff (neq n 0) (_R (const 0) (\i past _ -> iff (multiple n i) (iff (is_prime i) (_Z past) past) past) [] n) (undefined)
+
+ackermann :: Int -> Int -> Int
+ackermann m n= iff (eq m 0) (_Z n) (iff (eq n 0) (ackermann (sub1 m) (_Z 0)) (ackermann (sub1 m) (ackermann m (sub1 n))))
