@@ -9,8 +9,11 @@ main = print (add 1 1)
 zero :: Int -> Int -- const 0
 zero = _N
 
-const_arr :: Int -> [Int] -> Int
+-- const :: Int -> Int -> Int
+-- const a _ = _R zero (\i past xs -> _Z past) a
 
+-- const_arr :: Int -> [Int] -> Int
+-- const_arr a _ = const a
 
 zero_arr :: [Int] -> Int
 zero_arr _ = zero 0
@@ -73,9 +76,11 @@ eq a b = and (geq a b) (geq b a)
 neq :: Int -> Int -> Int
 neq a b = not(eq a b)
 
+--1(d)
 div :: Int -> Int -> Int
 div a b = iff (neq b 0) (_R zero_arr (\_ past _ -> iff (leq (mul (_Z past) b) a) (_Z past) past) [] a) (undefined)
 
+--1(e)
 mod :: Int -> Int -> Int
 mod a b = sub a (mul (div a b) b)
 
@@ -85,6 +90,7 @@ multiple a b = eq (mod a b) 0
 deg :: Int -> Int -> Int
 deg a b = _R (const 1) (\i past xs -> mul past a) [] b
 
+--1(f)
 plog :: Int -> Int -> Int
 plog a b = iff (geq a 2) (_R zero_arr (\i past xs -> iff (multiple b (deg a (_Z past))) (_Z past) past) [] b) (undefined)
 
@@ -94,21 +100,26 @@ square a = mul a a
 sqrt :: Int -> Int
 sqrt a = _R zero_arr (\_ past _ -> iff (leq (square (_Z past)) a) (_Z past) past) [] a
 
+--1(g)
 is_prime :: Int -> Int
 is_prime a = iff (less a 2) 0 (_R (const 1) (\i past _ -> (iff past (iff (less i 2) 1 (not (multiple a i))) 0)) [] (_Z (sqrt a)))
 
 th_primes :: Int -> Int -> Int
 th_primes i n = iff (is_prime i) (iff (eq n 1) i (th_primes (_Z i) (sub1 n))) (th_primes (_Z i) n)
 
+--1(h)
 th_prime :: Int -> Int
 th_prime n = th_primes 1 n
 
+--1(i)
 gedel_size :: Int -> Int
 gedel_size n = iff (neq n 0) (_R (const 0) (\i past _ -> iff (multiple n i) (iff (is_prime i) (_Z past) past) past) [] n) (undefined)
 
+--1(j)
 gedel_th_elem :: Int -> Int -> Int
 gedel_th_elem num n = plog (th_prime n) num
 
+--1(k)
 cons :: Int -> Int -> Int
 cons k num = _R (const (deg 2 k)) (\i past _ -> mul past (deg (th_prime (add i 2)) (gedel_th_elem num (_Z i)))) [] (gedel_size num)
 
