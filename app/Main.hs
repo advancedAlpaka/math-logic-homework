@@ -123,7 +123,8 @@ gedel_th_elem num n = plog (th_prime n) num
 cons :: Int -> Int -> Int
 cons k num = _R (const (deg 2 k)) (\i past _ -> mul past (deg (th_prime (add i 2)) (gedel_th_elem num (_Z i)))) [] (gedel_size num)
 
---   4 = _Z $ _Z $ _Z $ _Z 0
+-- 2
+-- 4 = _Z $ _Z $ _Z $ _Z 0
 -- `(` - 3  `)` - 5
 gedel_check_correct :: Int -> Int
 gedel_check_correct num = iff (eq 1 (_R one_arr (\i past _ -> iff (eq past 0) 0 (sub (add past 4) (gedel_th_elem num (_Z i))) ) [] (_Z (gedel_size num)))) 1 0
